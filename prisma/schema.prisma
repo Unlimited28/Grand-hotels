@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String   @id @default(cuid())
+  username             String   @unique
+  password_hash        String
+  must_change_password Boolean  @default(true)
+  created_at           DateTime @default(now())
+}
+
+model Room {
+  id           String    @id @default(cuid())
+  name         String
+  description  String    @db.Text
+  price        Float
+  image_url    String
+  availability Boolean   @default(true)
+  type         String?   // Added to distinguish room types
+  amenities    String    @default("") // Comma separated for simplicity or use String[] if preferred
+  bookings     Booking[]
+}
+
+model Booking {
+  id         String   @id @default(cuid())
+  name       String
+  email      String
+  phone      String
+  room_id    String
+  room       Room     @relation(fields: [room_id], references: [id])
+  check_in   DateTime
+  check_out  DateTime
+  guests     Int      @default(1)
+  status     String   @default("PENDING") // PENDING, CONFIRMED, CANCELLED
+  created_at DateTime @default(now())
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  name       String
+  rating     Int
+  message    String   @db.Text
+  approved   Boolean  @default(false)
+  created_at DateTime @default(now())
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  name       String
+  email      String
+  message    String   @db.Text
+  created_at DateTime @default(now())
+}
+
+model GalleryImage {
+  id         String   @id @default(cuid())
+  url        String
+  caption    String?
+  category   String?
+  created_at DateTime @default(now())
+}
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String @db.Text
+}
